@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SavewithLucia</title>
+<link rel="stylesheet" href="style.css">
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, updateDoc, increment } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBQ6jee36eW4Ji217pz4PMX-pHZL6BTAGQ",
+    authDomain: "savewithlucia.firebaseapp.com",
+    projectId: "savewithlucia",
+    storageBucket: "savewithlucia.firebasestorage.app",
+    messagingSenderId: "1013512229730",
+    appId: "1:1013512229730:web:95679b02cd4cedf63c123b",
+    measurementId: "G-XY5J8SVC5R"
+  };
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+window.db = db;
+window.fb = { collection, addDoc, deleteDoc, doc, onSnapshot, updateDoc, increment };
+</script>
+</head>
+<body>
+<header>
+  <div class="logo">Save with <span>Lucia</span></div>
+  <button id="adminBtn">Admin</button>
+</header>
+<section class="hero">
+  <h1>Save Together, <span>Grow Together</span></h1>
+  <p>Real-time Ajo - Admin works live now!</p>
+  <button id="createBtn" style="display:none">+ Create Group</button>
+</section>
+<div id="groups"></div>
+
+<div id="joinModal" class="modal">
+  <div class="box">
+    <span class="close" onclick="closeModal('joinModal')">&times;</span>
+    <h3 id="mTitle"></h3>
+    <input id="cName" placeholder="Your Full Name">
+    <input id="cPhone" placeholder="WhatsApp Number">
+    <button id="joinPay">Join via WhatsApp</button>
+  </div>
+</div>
+
+<div id="createModal" class="modal">
+  <div class="box">
+    <span class="close" onclick="closeModal('createModal')">&times;</span>
+    <h3>Create Group (Live)</h3>
+    <select id="nType"><option>Daily</option><option>Weekly</option><option>Monthly</option></select>
+    <input id="nTitle" placeholder="Title e.g 10k Daily">
+    <input id="nDesc" placeholder="Description">
+    <input id="nSlots" type="number" placeholder="Slots e.g 10">
+    <button id="saveBtn">Save Live</button>
+  </div>
+</div>
+<script type="module" src="script.js"></script>
+</body>
+</html>
