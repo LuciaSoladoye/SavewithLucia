@@ -1,62 +1,162 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SavewithLucia</title>
-<link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SaveWithLucia - Admin</title>
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, updateDoc, increment } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyBQ6jee36eW4Ji217pz4PMX-pHZL6BTAGQ",
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, updateDoc, increment, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  const firebaseConfig = {
+    apiKey: "AIzaSyB...REPLACE_WITH_YOURS",
     authDomain: "savewithlucia.firebaseapp.com",
     projectId: "savewithlucia",
-    storageBucket: "savewithlucia.firebasestorage.app",
-    messagingSenderId: "1013512229730",
-    appId: "1:1013512229730:web:95679b02cd4cedf63c123b",
-    measurementId: "G-XY5J8SVC5R"
+    storageBucket: "savewithlucia.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "1:123456789:web:abcdef"
   };
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-window.db = db;
-window.fb = { collection, addDoc, deleteDoc, doc, onSnapshot, updateDoc, increment };
+  // IF YOU ALREADY HAVE FIREBASE CONFIG IN YOUR OLD FILE, COPY IT HERE
+  // For now using your existing global if available
+  let app, db;
+  try { app = initializeApp(firebaseConfig); db = getFirestore(app); window.db = db; } catch(e){ db = window.db; }
+  window.fb = { collection, addDoc, deleteDoc, doc, onSnapshot, updateDoc, increment, query, where, getDocs };
 </script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:Inter,system-ui,sans-serif}
+  body{background:#faf7f3;color:#222}
+  header{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;background:white;border-bottom:1px solid #eee;position:sticky;top:0}
+  .logo{font-family:Georgia,serif;font-size:22px;letter-spacing:1px}
+  nav{font-size:11px;letter-spacing:2px;display:flex;gap:15px;color:#888}
+  .admin-badge{background:#e8d5a3;color:#5a4a2a;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:bold;display:inline-block;margin-top:8px;cursor:pointer}
+  .wrap{padding:20px;max-width:1100px;margin:auto}
+  .welcome{background:#e6f4ed;color:#2a7a4b;padding:14px 18px;border-radius:12px;margin:20px 0;font-size:14px}
+  h1{font-family:Georgia,serif;font-size:28px;margin:10px 0 5px}
+  .date{color:#999;font-size:13px;margin-bottom:20px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .card{background:white;border-radius:14px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,0.04)}
+  .card small{font-size:10px;letter-spacing:1.5px;color:#888;text-transform:uppercase;display:block;margin-bottom:12px}
+  .card h2{font-size:28px;font-weight:700}
+  .card p{font-size:12px;color:#999;margin-top:4px}
+  .gold{color:#b89b4c;font-weight:bold}
+  .plans{margin-top:25px}
+  .plan-card{background:white;border-radius:14px;padding:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+  button{background:#800020;color:white;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-size:13px}
+  .btn2{background:#0d2a54}
+  input,select,textarea{width:100%;padding:12px;margin:8px 0;border:1px solid #ddd;border-radius:8px}
+  #joinModal,#createModal,#membersModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;z-index:9999}
+  .modal-box{background:white;padding:22px;border-radius:14px;width:92%;max-width:480px}
+</style>
 </head>
 <body>
 <header>
-  <div class="logo">Save with <span>Lucia</span></div>
-  <button id="adminBtn">Admin</button>
+  <div><div class="logo">SaveWithLucia</div><div class="admin-badge" id="adminBtn">ADMIN</div></div>
+  <nav><span>DASHBOARD</span><span>PLANS</span><span>ROTATION</span></nav>
 </header>
-<section class="hero">
-  <h1>Save Together, <span>Grow Together</span></h1>
-  <p>Real-time Ajo - Admin works live now!</p>
-  <button id="createBtn" style="display:none">+ Create Group</button>
-</section>
-<div id="groups"></div>
 
-<div id="joinModal" class="modal">
-  <div class="box">
-    <span class="close" onclick="closeModal('joinModal')">&times;</span>
-    <h3 id="mTitle"></h3>
-    <input id="cName" placeholder="Your Full Name">
-    <input id="cPhone" placeholder="WhatsApp Number">
-    <button id="joinPay">Join via WhatsApp</button>
+<div class="wrap">
+  <div class="welcome">Welcome back,Lucia Soladoye !</div>
+  <h1>Admin Dashboard</h1>
+  <div class="date" id="today"></div>
+
+  <div class="grid">
+    <div class="card"><small>Total Members</small><h2 id="totalMembers">0</h2><p>All registered users</p></div>
+    <div class="card"><small>Total Plans</small><h2 id="totalPlans">0</h2><p id="planStatus">0 running - 0 open</p></div>
+    <div class="card"><small>Members Collected</small><h2 id="collected">0</h2><p>Payouts done</p></div>
+    <div class="card"><small>Plans Completed</small><h2 id="completed">0</h2><p>Fully done</p></div>
+    <div class="card"><small>Total Contributions</small><h2 class="gold" id="totalContrib">₦0.00</h2><p>Verified</p></div>
+    <div class="card"><small>Pending Cash</small><h2 id="pending">0</h2><p style="color:#b89b4c;cursor:pointer">Verify now</p></div>
+  </div>
+
+  <div class="plans">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:25px 0 15px">
+      <h3>All Savings Plans</h3><button id="createBtn" style="display:none">+ Create Plan</button>
+    </div>
+    <div id="groups"></div>
   </div>
 </div>
 
-<div id="createModal" class="modal">
-  <div class="box">
-    <span class="close" onclick="closeModal('createModal')">&times;</span>
-    <h3>Create Group (Live)</h3>
-    <select id="nType"><option>Daily</option><option>Weekly</option><option>Monthly</option></select>
-    <input id="nTitle" placeholder="Title e.g 10k Daily">
-    <input id="nDesc" placeholder="Description">
-    <input id="nSlots" type="number" placeholder="Slots e.g 10">
-    <button id="saveBtn">Save Live</button>
-  </div>
-</div>
-<script type="module" src="script.js"></script>
+<!-- Join Modal -->
+<div id="joinModal"><div class="modal-box">
+  <h3 id="mTitle"></h3><p style="font-size:13px;color:#666;margin:8px 0">Join and chat Lucia on WhatsApp</p>
+  <input id="cName" placeholder="Your Full Name"><input id="cPhone" placeholder="Your WhatsApp Number">
+  <button id="joinPay" style="width:100%;margin-top:10px">Pay & Join on WhatsApp</button>
+  <button onclick="closeModal('joinModal')" style="width:100%;background:#eee;color:#333;margin-top:8px">Cancel</button>
+</div></div>
+
+<!-- Create Modal -->
+<div id="createModal"><div class="modal-box">
+  <h3>Create New Plan</h3>
+  <input id="nTitle" placeholder="e.g. 10k Daily Ajo"><textarea id="nDesc" placeholder="Description"></textarea>
+  <select id="nType"><option>Daily</option><option>Weekly</option><option>Monthly</option></select>
+  <input id="nSlots" type="number" placeholder="Total Slots e.g. 10"><input id="nAmount" type="number" placeholder="Amount per slot e.g. 10000">
+  <button id="saveBtn" style="width:100%;margin-top:10px">Save Plan Live</button>
+  <button onclick="closeModal('createModal')" style="width:100%;background:#eee;color:#333;margin-top:8px">Cancel</button>
+</div></div>
+
+<!-- Members Modal -->
+<div id="membersModal"><div class="modal-box"><div id="membersContent"></div></div></div>
+
+<script type="module">
+document.getElementById('today').innerText = new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+const wrap = document.getElementById('groups');
+let groups=[], isAdmin=false, active=null;
+const { collection, addDoc, deleteDoc, doc, onSnapshot, updateDoc, increment, query, where, getDocs } = window.fb;
+const groupsRef = collection(window.db, "groups");
+const membersRef = collection(window.db, "members");
+
+onSnapshot(groupsRef, snap=>{
+  groups=[]; snap.forEach(d=>groups.push({id:d.id,...d.data()}));
+  draw(); updateStats();
+});
+onSnapshot(membersRef, snap=>{ updateStats(snap); });
+
+function updateStats(mSnap){
+  document.getElementById('totalPlans').innerText = groups.length;
+  document.getElementById('planStatus').innerText = ${groups.filter(g=>g.joined>=g.slots).length} running - ${groups.filter(g=>g.joined<g.slots).length} open;
+  if(mSnap){
+    let total = mSnap.size; let collected = 0; let pending = 0; let contrib = 0;
+    mSnap.forEach(d=>{ let m=d.data(); if(m.collected) collected++; if(!m.paid) pending++; if(m.paid) contrib += (groups.find(g=>g.id===m.groupId)?.amount || 0); });
+    document.getElementById('totalMembers').innerText = total;
+    document.getElementById('collected').innerText = collected;
+    document.getElementById('pending').innerText = pending;
+    document.getElementById('totalContrib').innerText = '₦' + contrib.toLocaleString() + '.00';
+    document.getElementById('completed').innerText = groups.filter(g=>g.joined>=g.slots).length;
+  }
+}
+
+function draw(){
+  wrap.innerHTML=''; if(!groups.length){ wrap.innerHTML='<p style="text-align:center;padding:20px;color:#999">No plans yet. Login as Admin to create.</p>'; return;}
+  groups.forEach(g=>{
+    let left=g.slots-(g.joined||0);
+    wrap.innerHTML+=<div class="plan-card"><div><b>${g.title}</b><br><small style="color:#888">${g.type} - ₦${(g.amount||0).toLocaleString()} | ${g.desc||''}</small><br><small>${left} slots left</small></div><div><button onclick="join('${g.id}')" ${left<=0?'disabled':''}>${left<=0?'Full':'Join'}</button>${isAdmin?<br><button onclick="viewMembers('${g.id}','${g.title}')" class="btn2" style="margin-top:6px;font-size:11px">View (${g.joined||0})</button>:''}</div></div>;
+  });
+}
+window.join=id=>{ active=groups.find(g=>g.id===id); document.getElementById('mTitle').innerText=active.title; document.getElementById('joinModal').style.display='flex'; }
+window.closeModal=id=>document.getElementById(id).style.display='none';
+document.getElementById('joinPay').onclick=async()=>{
+  let name=document.getElementById('cName').value.trim(), phone=document.getElementById('cPhone').value.trim();
+  if(!name||!phone) return alert('Fill name and phone');
+  let msg=Hi Lucia, I want to join ${active.title}. Name: ${name}, Phone: ${phone};
+  window.open(https://wa.me/2347042877566?text=${encodeURIComponent(msg)},'_blank');
+  closeModal('joinModal');
+  try{ await addDoc(membersRef,{groupId:active.id,groupTitle:active.title,name,phone,paid:false,collected:false,joinedAt:new Date()}); await updateDoc(doc(window.db,"groups",active.id),{joined:increment(1)});}catch(e){console.log(e)}
+}
+window.viewMembers=async(id,title)=>{
+  let q=query(membersRef,where("groupId","==",id)); let snap=await getDocs(q);
+  let html=<h3>${title} - Members</h3><div style="max-height:350px;overflow:auto;margin-top:10px">; let i=1;
+  if(snap.empty) html+='<p>No members</p>';
+  snap.forEach(d=>{ let m=d.data(); html+=<div style="border-bottom:1px solid #eee;padding:10px 0"><b>${i}. ${m.name}</b> - ${m.phone}<br><small>${m.paid?'✅ PAID':'❌ Not Paid'} | ${m.collected?'💰 Collected':'⏳ Next'}</small><br><button onclick="markPaid('${d.id}',${!m.paid})" style="font-size:11px;margin-top:5px">${m.paid?'Unmark Paid':'Mark Paid'}</button> <button onclick="markCollected('${d.id}',${!m.collected})" class="btn2" style="font-size:11px"> ${m.collected?'Unmark':'Mark Collected'}</button></div>; i++; });
+  html+=</div><button onclick="closeModal('membersModal')" style="width:100%;margin-top:12px;background:#800020">Close</button>; document.getElementById('membersContent').innerHTML=html; document.getElementById('membersModal').style.display='flex';
+}
+window.markPaid=async(mid,val)=>{ await updateDoc(doc(window.db,"members",mid),{paid:val}); closeModal('membersModal'); }
+window.markCollected=async(mid,val)=>{ await updateDoc(doc(window.db,"members",mid),{collected:val}); closeModal('membersModal'); }
+document.getElementById('adminBtn').onclick=()=>{ let p=prompt('Admin password:'); if(p==='lucia123'){ isAdmin=true; document.getElementById('createBtn').style.display='inline-block'; draw(); alert('Admin ON!'); } };
+document.getElementById('createBtn').onclick=()=>document.getElementById('createModal').style.display='flex';
+document.getElementById('saveBtn').onclick=async()=>{
+  let title=document.getElementById('nTitle').value, desc=document.getElementById('nDesc').value, type=document.getElementById('nType').value, slots=parseInt(document.getElementById('nSlots').value), amount=parseInt(document.getElementById('nAmount').value||0);
+  if(!title||!slots) return alert('Fill title and slots');
+  await addDoc(groupsRef,{type,title,desc,slots,joined:0,amount}); closeModal('createModal');
+}
+</script>
 </body>
 </html>
