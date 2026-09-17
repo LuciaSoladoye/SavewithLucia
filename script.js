@@ -45,7 +45,7 @@ document.getElementById('joinPay').onclick=async()=>{
   if(!name||!phone) return alert('Put name and number');
   await updateDoc(doc(window.db,"groups",active.id), {joined: increment(1)});
   let msg=`Hi Lucia, I want to join ${active.title}. Name: ${name}, Phone: ${phone}`;
-  window.open(`https://wa.me/2340000000000?text=${encodeURIComponent(msg)}`,'_blank');
+  window.open(`https://wa.me/2347042877566?text=${encodeURIComponent(msg)}`,'_blank');
   closeModal('joinModal');
 }
 
