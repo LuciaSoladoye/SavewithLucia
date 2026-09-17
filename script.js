@@ -103,3 +103,22 @@ document.getElementById('saveBtn').onclick=async()=>{
   document.getElementById('nDesc').value='';
   document.getElementById('nSlots').value='';
 }
+// DASHBOARD COUNTERS
+function updateDash(membersSnap){
+  document.getElementById('totalPlans').innerText = groups.length;
+  if(membersSnap){
+    let total = membersSnap.size; let collected = 0; let pending = 0;
+    membersSnap.forEach(d=>{ let m=d.data(); if(m.collected) collected++; if(!m.paid) pending++; });
+    document.getElementById('totalMembers').innerText = total;
+    document.getElementById('collected').innerText = collected;
+    document.getElementById('pending').innerText = pending;
+    document.getElementById('completed').innerText = groups.filter(g=>g.joined>=g.slots).length;
+  }
+}
+// Call it when members load
+onSnapshot(membersRef, snap=>{ updateDash(snap); });
+// Show dashboard only for admin
+const oldAdmin = document.getElementById('adminBtn').onclick;
+document.getElementById('adminBtn').onclick = ()=>{
+  let p=prompt('Admin password:'); if(p==='lucia123'){ isAdmin=true; document.getElementById('createBtn').style.display='inline-block'; document.getElementById('adminDash').style.display='block'; draw(); }
+}
