@@ -2,60 +2,74 @@
 <html>
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SaveWithLucia</title>
-<style>
- body{font-family:system-ui;background:#fff7f8;margin:0}
- header{background:#800020;color:white;padding:16px;display:flex;justify-content:space-between;align-items:center}
- .logo{font-weight:bold;font-size:22px}
- .wrap{padding:18px;max-width:1100px;margin:auto}
- .title{font-size:20px;margin:18px 0 10px;color:#800020;font-weight:bold}
- .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
- .card{background:white;border:1px solid #f0d0d5;border-radius:14px;padding:16px}
- .badge{background:#fff0f2;color:#800020;padding:5px 10px;border-radius:20px;font-size:12px;display:inline-block;margin:8px 0}
- button{background:#800020;color:white;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;width:100%;margin-top:8px}
- .admin-top{background:#faf7f3;border:1px solid #f0d0d5;border-radius:14px;padding:14px;margin-bottom:18px;display:none}
- .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
- .dash-card{background:white;border-radius:12px;padding:12px}
- .dash-card small{font-size:10px;color:#888;letter-spacing:1px}
- .dash-card h2{font-size:22px}
-</style>
+<title>SavewithLucia</title>
+<link rel="stylesheet" href="style.css">
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, updateDoc, increment } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBQ6jee36eW4Ji217pz4PMX-pHZL6BTAGQ",
+    authDomain: "savewithlucia.firebaseapp.com",
+    projectId: "savewithlucia",
+    storageBucket: "savewithlucia.firebasestorage.app",
+    messagingSenderId: "1013512229730",
+    appId: "1:1013512229730:web:95679b02cd4cedf63c123b",
+    measurementId: "G-XY5J8SVC5R"
+  };
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+window.db = db;
+window.fb = { collection, addDoc, deleteDoc, doc, onSnapshot, updateDoc, increment };
+</script>
 </head>
 <body>
-<header><div class="logo">SaveWithLucia</div><div><button id="adminBtn" style="width:auto;background:white;color:#800020;padding:6px 12px">Admin</button> <button id="createBtn" style="width:auto;display:none;background:#0d2a54">+ Create</button></div></header>
-
-<div class="wrap">
-  <!-- DASHBOARD YOU WANTED - SHOWS ONLY WHEN ADMIN LOGS IN -->
-  <div id="adminDash" class="admin-top">
-    <h3>Admin Dashboard - Welcome back Lucia!</h3>
-    <div class="dash-grid">
-      <div class="dash-card"><small>TOTAL MEMBERS</small><h2 id="totalMembers">0</h2></div>
-      <div class="dash-card"><small>TOTAL PLANS</small><h2 id="totalPlans">0</h2></div>
-      <div class="dash-card"><small>MEMBERS COLLECTED</small><h2 id="collected">0</h2></div>
-      <div class="dash-card"><small>PLANS COMPLETED</small><h2 id="completed">0</h2></div>
-      <div class="dash-card"><small>TOTAL CONTRIBUTIONS</small><h2 id="totalContrib">₦0</h2></div>
-      <div class="dash-card"><small>PENDING CASH</small><h2 id="pending">0</h2></div>
-    </div>
+<header>
+  <div class="logo">Save with <span>Lucia</span></div>
+  <button id="adminBtn">Admin</button>
+</header>
+<section class="hero">
+  <h1>Save Together, <span>Grow Together</span></h1>
+  <p>Real-time Ajo - Admin works live now!</p>
+  <button id="createBtn" style="display:none">+ Create Group</button>
+</section>
+<div id="groups"></div>
+ <!-- ADMIN DASHBOARD - ONLY SHOWS WHEN YOU LOGIN -->
+<div id="adminDash" style="display:none;background:#faf7f3;border:1px solid #f0d0d5;border-radius:14px;padding:14px;margin-bottom:18px">
+  <h3 style="color:#800020;font-family:Georgia">Admin Dashboard - Welcome back Lucia!</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+    <div style="background:white;border-radius:12px;padding:12px"><small style="font-size:10px;color:#888">TOTAL MEMBERS</small><h2 id="totalMembers" style="font-size:22px">0</h2></div>
+    <div style="background:white;border-radius:12px;padding:12px"><small style="font-size:10px;color:#888">TOTAL PLANS</small><h2 id="totalPlans" style="font-size:22px">0</h2></div>
+    <div style="background:white;border-radius:12px;padding:12px"><small style="font-size:10px;color:#888">MEMBERS COLLECTED</small><h2 id="collected" style="font-size:22px">0</h2></div>
+    <div style="background:white;border-radius:12px;padding:12px"><small style="font-size:10px;color:#888">PLANS COMPLETED</small><h2 id="completed" style="font-size:22px">0</h2></div>
+    <div style="background:white;border-radius:12px;padding:12px"><small style="font-size:10px;color:#888">TOTAL CONTRIBUTIONS</small><h2 id="totalContrib" style="font-size:22px;color:#b89b4c">₦0</h2></div>
+    <div style="background:white;border-radius:12px;padding:12px"><small style="font-size:10px;color:#888">PENDING CASH</small><h2 id="pending" style="font-size:22px">0</h2></div>
   </div>
-
-  <div id="groups">Loading...</div>
+</div>
+</section>
+<div id="groups"></div>
+<div id="joinModal" class="modal">
+  <div class="box">
+    <span class="close" onclick="closeModal('joinModal')">&times;</span>
+    <h3 id="mTitle"></h3>
+    <input id="cName" placeholder="Your Full Name">
+    <input id="cPhone" placeholder="WhatsApp Number">
+    <button id="joinPay">Join via WhatsApp</button>
+  </div>
 </div>
 
-<!-- KEEP YOUR OLD MODALS -->
-<div id="joinModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:9999"><div style="background:white;padding:20px;border-radius:12px;width:90%;max-width:400px"><h3 id="mTitle"></h3><input id="cName" placeholder="Your Name" style="width:100%;padding:10px;margin:8px 0"><input id="cPhone" placeholder="WhatsApp Number" style="width:100%;padding:10px;margin:8px 0"><button id="joinPay">Pay & Join on WhatsApp</button><button onclick="closeModal('joinModal')" style="background:#eee;color:#333">Cancel</button></div></div>
-<div id="createModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:9999"><div style="background:white;padding:20px;border-radius:12px;width:90%;max-width:400px"><h3>Create Plan</h3><input id="nTitle" placeholder="Title" style="width:100%;padding:10px;margin:6px 0"><input id="nDesc" placeholder="Description" style="width:100%;padding:10px;margin:6px 0"><select id="nType" style="width:100%;padding:10px"><option>Daily</option><option>Weekly</option><option>Monthly</option></select><input id="nSlots" type="number" placeholder="Slots" style="width:100%;padding:10px;margin:6px 0"><input id="nAmount" type="number" placeholder="Amount" style="width:100%;padding:10px;margin:6px 0"><button id="saveBtn">Save</button><button onclick="closeModal('createModal')" style="background:#eee;color:#333">Cancel</button></div></div>
-<div id="membersModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);justify-content:center;align-items:center;z-index:99999"><div style="background:white;padding:20px;border-radius:12px;width:92%;max-width:500px"><div id="membersContent"></div></div></div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, updateDoc, increment, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-// USE YOUR OLD FIREBASE CONFIG HERE - I WILL TRY TO AUTO-DETECT YOUR OLD ONE
-const firebaseConfig = JSON.parse(localStorage.getItem('firebaseConfig') || 'null') || '{"apiKey":"AIzaSyDummy","projectId":"savewithlucia"}';
-let db; try{ const app=initializeApp(JSON.parse(document.documentElement.getAttribute('data-fb')||'null')||{"apiKey":"AIzaSyC9g4y2h2h2h2h2","authDomain":"savewithlucia.firebaseapp.com","projectId":"savewithlucia"}); db=getFirestore(app);}catch(e){ db=window.db }
-if(!db){ // fallback to your working db if you had one
-  try{ const app=initializeApp({"apiKey":"AIzaSyBv...","projectId":"savewithlucia"}); db=getFirestore(app);}catch(e){}
-}
-window.db=db; window.fb={collection,addDoc,deleteDoc,doc,onSnapshot,updateDoc,increment,query,where,getDocs};
-</script>
-<script src="script.js?v=400"></script>
+<div id="createModal" class="modal">
+  <div class="box">
+    <span class="close" onclick="closeModal('createModal')">&times;</span>
+    <h3>Create Group (Live)</h3>
+    <select id="nType"><option>Daily</option><option>Weekly</option><option>Monthly</option></select>
+    <input id="nTitle" placeholder="Title e.g 10k Daily">
+    <input id="nDesc" placeholder="Description">
+    <input id="nSlots" type="number" placeholder="Slots e.g 10">
+    <button id="saveBtn">Save Live</button>
+  </div>
+</div>
+<script type="module" src="script.js"></script>
 </body>
 </html>
